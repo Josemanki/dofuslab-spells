@@ -142,10 +142,8 @@ const getEffects = (effects) => {
         maxStat: effect.effectId === 5 || effect.effectId === 1020 ? String(effect.diceNum) : effect.diceSide,
       });
     } else {
-      console.log(effect.effectId, 'effid');
       const foundEffect = effectData.find((effectToFind) => effectToFind.id === effect.effectId);
       const foundSpell = effect.value ? fullSpellList[effect.value] : null;
-      // console.log(effect.value);
 
       const getTranslationId = (value) => {
         if (value && value < 12000) {
@@ -327,66 +325,66 @@ const ptSpells = ptData.texts;
 
 let translatedSpells = [];
 
-spellIdList.forEach((classArray) => {
-  let translatedClassSpells = [];
-  classArray.forEach((spell) => {
-    console.log(spell.id);
-    translatedClassSpells = [
-      ...translatedClassSpells,
-      {
-        name: {
-          en: enSpells[spell.nameId],
-          fr: frSpells[spell.nameId],
-          de: deSpells[spell.nameId],
-          es: esSpells[spell.nameId],
-          it: itSpells[spell.nameId],
-          pt: ptSpells[spell.nameId],
-        },
-        description: {
-          en: enSpells[spell.descriptionId],
-          fr: frSpells[spell.descriptionId],
-          de: deSpells[spell.descriptionId],
-          es: esSpells[spell.descriptionId],
-          it: itSpells[spell.descriptionId],
-          pt: ptSpells[spell.descriptionId],
-        },
-        imageUrl: `spell/${spell.icon}.png`,
-        effects: spell.spellLevels.map((spellLevelId) => {
-          const eff = spellLevelData.find((spellToFind) => {
-            return spellToFind.id == spellLevelId;
-          });
-          const effectArray = eff.effects.filter((item) =>
-            Object.keys(modifiableEffectStrings).includes(String(item.effectId))
-          );
+  spellIdList.forEach((classArray) => {
+    let translatedClassSpells = [];
+    classArray.forEach((spell) => {
+      console.log(spell.id);
+      translatedClassSpells = [
+        ...translatedClassSpells,
+        {
+          name: {
+            en: enSpells[spell.nameId],
+            fr: frSpells[spell.nameId],
+            de: deSpells[spell.nameId],
+            es: esSpells[spell.nameId],
+            it: itSpells[spell.nameId],
+            pt: ptSpells[spell.nameId],
+          },
+          description: {
+            en: enSpells[spell.descriptionId],
+            fr: frSpells[spell.descriptionId],
+            de: deSpells[spell.descriptionId],
+            es: esSpells[spell.descriptionId],
+            it: itSpells[spell.descriptionId],
+            pt: ptSpells[spell.descriptionId],
+          },
+          imageUrl: `spell/${spell.icon}.png`,
+          effects: spell.spellLevels.map((spellLevelId) => {
+            const eff = spellLevelData.find((spellToFind) => {
+              return spellToFind.id == spellLevelId;
+            });
+            const effectArray = eff.effects.filter((item) =>
+              Object.keys(modifiableEffectStrings).includes(String(item.effectId))
+            );
 
-          const aoeType = getSpellAoe(effectArray?.[0]);
-          return {
-            level: eff.minPlayerLevel ? String(eff.minPlayerLevel) : null,
-            apCost: eff.apCost ? String(eff.apCost) : null,
-            cooldown: eff.minCastInterval ? String(eff.minCastInterval) : null,
-            baseCritRate: eff.criticalHitProbability ? String(eff.criticalHitProbability) : null,
-            castsPerPlayer: eff.maxCastPerTarget ? String(eff.maxCastPerTarget) : null,
-            castsPerTurn: eff.maxCastPerTurn ? String(eff.maxCastPerTurn) : null,
-            needLos: eff.castTestLos,
-            modifiableRange: eff.rangeCanBeBoosted,
-            isLinear: eff.castInLine,
-            needsFreeCell: eff.needFreeCell,
-            aoeType: aoeType === {} ? null : aoeType,
-            spellRange: getSpellRange(eff.minRange, eff.range),
-            normalEffects: getEffects(eff.effects),
-            criticalEffects: getEffects(eff.criticalEffect),
-          };
-        }),
-      },
-    ];
+            const aoeType = getSpellAoe(effectArray?.[0]);
+            return {
+              level: eff.minPlayerLevel ? String(eff.minPlayerLevel) : null,
+              apCost: eff.apCost ? String(eff.apCost) : null,
+              cooldown: eff.minCastInterval ? String(eff.minCastInterval) : null,
+              baseCritRate: eff.criticalHitProbability ? String(eff.criticalHitProbability) : null,
+              castsPerPlayer: eff.maxCastPerTarget ? String(eff.maxCastPerTarget) : null,
+              castsPerTurn: eff.maxCastPerTurn ? String(eff.maxCastPerTurn) : null,
+              needLos: eff.castTestLos,
+              modifiableRange: eff.rangeCanBeBoosted,
+              isLinear: eff.castInLine,
+              needsFreeCell: eff.needFreeCell,
+              aoeType: aoeType === {} ? null : aoeType,
+              spellRange: getSpellRange(eff.minRange, eff.range),
+              normalEffects: getEffects(eff.effects),
+              criticalEffects: getEffects(eff.criticalEffect),
+            };
+          }),
+        },
+      ];
+    });
+    translatedSpells = [...translatedSpells, translatedClassSpells];
   });
-  translatedSpells = [...translatedSpells, translatedClassSpells];
-});
 
-try {
-  fs.unlinkSync('./output/translatedEffects.json');
-} catch (err) {
-  console.error('No matching file');
-}
+  try {
+    fs.unlinkSync('./output/translatedEffects.json');
+  } catch (err) {
+    console.error('No matching file');
+  }
 
-fs.writeFileSync('./output/translatedEffects.json', JSON.stringify(translatedSpells));
+  fs.writeFileSync('./output/translatedEffects.json', JSON.stringify(translatedSpells));

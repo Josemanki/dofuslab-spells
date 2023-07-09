@@ -28,25 +28,25 @@ const areaSet = new Set();
 
 console.log(spellLevelData[0]);
 
-const areas = spellIdData.forEach((dofusClass) => {
-  dofusClass.forEach((spell) => {
-    spell.spellLevels.forEach((spellLevel) => {
-      const foundSpell = spellLevelData.find((spellLevelInData) => spellLevelInData.id === spellLevel);
-      foundSpell?.effects?.forEach((effect) => {
-        const area = effect.rawZone.split(',')[0];
-        areaSet.add(area);
+  const areas = spellIdData.forEach((dofusClass) => {
+    dofusClass.forEach((spell) => {
+      spell.spellLevels.forEach((spellLevel) => {
+        const foundSpell = spellLevelData.find((spellLevelInData) => spellLevelInData.id === spellLevel);
+        foundSpell?.effects?.forEach((effect) => {
+          const area = effect.rawZone.split(',')[0];
+          areaSet.add(area);
+        });
       });
     });
   });
-});
 
-console.log(areaSet);
+  console.log(areaSet);
 
-try {
-  fs.unlinkSync('./temp/effectList.json');
-} catch (err) {
-  console.error('No matching file');
-}
+  try {
+    fs.unlinkSync('./temp/effectList.json');
+  } catch (err) {
+    console.error('No matching file');
+  }
 
-fs.writeFileSync('./temp/effectList.json', JSON.stringify(effectList));
-fs.writeFileSync('./temp/modifiableEffectList.json', JSON.stringify(modifiableEffectList));
+  fs.writeFileSync('./temp/effectList.json', JSON.stringify(effectList));
+  fs.writeFileSync('./temp/modifiableEffectList.json', JSON.stringify(modifiableEffectList));

@@ -18,43 +18,43 @@
 
 const fs = require('fs');
 
-const spells = JSON.parse(
-  fs.readFileSync('./input/Spells.json', {
-    encoding: 'utf-8',
-  })
-);
+  const spells = JSON.parse(
+    fs.readFileSync('./input/Spells.json', {
+      encoding: 'utf-8',
+    })
+  );
 
-const breedList = JSON.parse(
-  fs.readFileSync('./temp/breedList.json', {
-    encoding: 'utf-8',
-  })
-);
+  const breedList = JSON.parse(
+    fs.readFileSync('./temp/breedList.json', {
+      encoding: 'utf-8',
+    })
+  );
 
-let orderedSpells = [];
+  let orderedSpells = [];
 
-breedList.forEach((breedItem) => {
-  let spellGroup = [];
-  breedItem.spells.forEach((singleSpell) => {
-    const foundSpell = spells.filter((spellInSpells) => spellInSpells.id === singleSpell);
-    spellGroup = [
-      ...spellGroup,
-      {
-        id: foundSpell[0].id,
-        icon: foundSpell[0].iconId,
-        nameId: foundSpell[0].nameId,
-        descriptionId: foundSpell[0].descriptionId,
-        spellLevels: foundSpell[0].spellLevels,
-      },
-    ];
+  breedList.forEach((breedItem) => {
+    let spellGroup = [];
+    breedItem.spells.forEach((singleSpell) => {
+      const foundSpell = spells.filter((spellInSpells) => spellInSpells.id === singleSpell);
+      spellGroup = [
+        ...spellGroup,
+        {
+          id: foundSpell[0].id,
+          icon: foundSpell[0].iconId,
+          nameId: foundSpell[0].nameId,
+          descriptionId: foundSpell[0].descriptionId,
+          spellLevels: foundSpell[0].spellLevels,
+        },
+      ];
+    });
+    console.log(spellGroup);
+    orderedSpells = [...orderedSpells, spellGroup];
   });
-  console.log(spellGroup);
-  orderedSpells = [...orderedSpells, spellGroup];
-});
 
-try {
-  fs.unlinkSync('./temp/spellIdList.json');
-} catch (err) {
-  console.error('No matching file');
-}
+  try {
+    fs.unlinkSync('./temp/spellIdList.json');
+  } catch (err) {
+    console.error('No matching file');
+  }
 
-fs.writeFileSync('./temp/spellIdList.json', JSON.stringify(orderedSpells));
+  fs.writeFileSync('./temp/spellIdList.json', JSON.stringify(orderedSpells));
