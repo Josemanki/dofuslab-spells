@@ -1,27 +1,34 @@
-const fs = require('fs');
+import fs from 'fs';
+import { BREED_TO_CLASS_MAP } from './constants.js';
+import { writeOutput } from './utils.js';
 
-  const spellVariants = JSON.parse(
-    fs.readFileSync('./input/SpellVariants.json', {
-      encoding: 'utf-8',
-    })
+const spellVariants = JSON.parse(
+  fs.readFileSync('./temp/Cleaned/SpellVariantsRoot.json', {
+    encoding: 'utf-8',
+  })
+);
+
+let orderedVariants = [];
+
+console.log('Processing breeds...');
+
+for (const breedId in BREED_TO_CLASS_MAP) {
+  console.log(`Processing breed: ${BREED_TO_CLASS_MAP[breedId]}`);
+
+  let breedSpellPairs = [];
+
+  const breed = spellVariants.filter(
+    (spellPair) => spellPair.breedId == breedId
   );
 
-  let orderedVariants = [];
+  breed.forEach((breed) => {
+    breedSpellPairs = [...breedSpellPairs, breed.spellIds.Array];
+  });
 
-  for (let i = 1; i <= 20; i++) {
-    const breed = spellVariants.filter((spellPair) => spellPair.breedId === i && spellPair.breedId != 19);
-    let unifiedBreed = [];
-    console.log(breed);
-    breed.forEach((breed) => {
-      unifiedBreed = [...unifiedBreed, ...breed.spellIds];
-    });
-    orderedVariants = [...orderedVariants, { breed: i, spells: unifiedBreed }];
-  }
+  orderedVariants = [
+    ...orderedVariants,
+    { breed: breedId, spells: breedSpellPairs },
+  ];
+}
 
-  try {
-    fs.unlinkSync('./temp/breedList.json');
-  } catch (err) {
-    console.error('No matching file');
-  }
-
-  fs.writeFileSync('./temp/breedList.json', JSON.stringify(orderedVariants));
+writeOutput('./temp/breedList.json', orderedVariants);
