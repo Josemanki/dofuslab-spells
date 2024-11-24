@@ -1,0 +1,12 @@
+{
+  "name": "dofuslab-spells",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Script to generate a semi-automated version of the current spells in Dofus to simplify getting DofusLab up-to-date.",
+  "main": "cleanUnityMetadata.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
