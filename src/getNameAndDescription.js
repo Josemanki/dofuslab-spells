@@ -8,7 +8,7 @@ const englishTranslations = JSON.parse(
 );
 
 const spells = JSON.parse(
-  fs.readFileSync('./temp/Cleaned/SpellsRoot.json', {
+  fs.readFileSync('./temp/SpellsRoot.json', {
     encoding: 'utf-8',
   })
 );
