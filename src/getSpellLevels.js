@@ -9,6 +9,8 @@ import {
 import { StatTemplateParser } from './templateEngine.js';
 import { cleanTempDirectory, writeOutput } from './utils.js';
 
+const debugEnabled = process.argv.includes('--keep-temp-files');
+
 const spellIdList = JSON.parse(
   fs.readFileSync('./temp/spellIdList.json', {
     encoding: 'utf-8',
@@ -204,9 +206,11 @@ const getEffects = (effects) => {
 };
 
 let translatedSpells = [];
+let debugTranslations = [];
 
 spellIdList.forEach((classArray) => {
   let translatedClassSpells = [];
+  let spellDebugTranslations = [];
   classArray.flat().forEach((spell) => {
     translatedClassSpells = [
       ...translatedClassSpells,
@@ -216,7 +220,7 @@ spellIdList.forEach((classArray) => {
           fr: datasets['fr'][spell.nameId],
           de: datasets['de'][spell.nameId],
           es: datasets['es'][spell.nameId],
-          it: datasets['it'][spell.nameId],
+          it: `[!] ${datasets['it'][spell.nameId]}`,
           pt: datasets['pt'][spell.nameId],
         },
         description: {
@@ -232,9 +236,9 @@ spellIdList.forEach((classArray) => {
           es: statsParser.sanitizeSpellText(
             datasets['es'][spell.descriptionId]
           ),
-          it: statsParser.sanitizeSpellText(
+          it: `[!] ${statsParser.sanitizeSpellText(
             datasets['it'][spell.descriptionId]
-          ),
+          )}`,
           pt: statsParser.sanitizeSpellText(
             datasets['pt'][spell.descriptionId]
           ),
@@ -271,10 +275,23 @@ spellIdList.forEach((classArray) => {
         }),
       },
     ];
+
+    if (debugEnabled) {
+      debugTranslations = [
+        ...debugTranslations,
+        {
+          id: spell.id,
+          name: datasets['en'][spell.nameId],
+        },
+      ];
+    }
   });
+
+  debugTranslations = [...debugTranslations, spellDebugTranslations];
   translatedSpells = [...translatedSpells, translatedClassSpells];
 });
 
 writeOutput('./output/translatedEffects.json', translatedSpells);
+debugEnabled && writeOutput('./temp/debugEffects.json', debugTranslations);
 
-cleanTempDirectory();
+!debugEnabled && cleanTempDirectory();

@@ -21,6 +21,5 @@ First we must understand folder structure - we need an input folder and an outpu
 
 ### Current todos
 
-- Accept params to keep the temp folder for debug purposes (it does what it does in small steps so it's easy to pinpoint the location of things that fail, or to compare a step with the previous or the next).
 - Integrate unpacking the client with the script directly since UABEA is very manual. This could be done by downloading files from another unpacker in the community or handing it over to the application regardless.
-- Figure out areas of effect.
+- Figure out areas of effect, now they are per effect so the scripts AND DofusLab have to adapt if we want to expose these.
