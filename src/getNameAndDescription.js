@@ -2,13 +2,13 @@ import fs from 'fs';
 import { writeOutput } from './utils.js';
 
 const englishTranslations = JSON.parse(
-  fs.readFileSync('./input/en.i18n.json', {
+  fs.readFileSync('./input/en.json', {
     encoding: 'utf-8',
   })
 );
 
 const spells = JSON.parse(
-  fs.readFileSync('./temp/SpellsRoot.json', {
+  fs.readFileSync('./temp/spells.json', {
     encoding: 'utf-8',
   })
 );

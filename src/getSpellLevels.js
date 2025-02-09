@@ -16,61 +16,61 @@ const spellIdList = JSON.parse(
 );
 
 const fullSpellList = JSON.parse(
-  fs.readFileSync('./temp/SpellsRoot.json', {
+  fs.readFileSync('./temp/spells.json', {
     encoding: 'utf-8',
   })
 );
 
 const fullStateList = JSON.parse(
-  fs.readFileSync('./temp/SpellStatesRoot.json', {
+  fs.readFileSync('./temp/spell_states.json', {
     encoding: 'utf-8',
   })
 );
 
 const enData = JSON.parse(
-  fs.readFileSync('./input/en.i18n.json', {
+  fs.readFileSync('./input/en.json', {
     encoding: 'utf-8',
   })
 );
 
 const esData = JSON.parse(
-  fs.readFileSync('./input/es.i18n.json', {
+  fs.readFileSync('./input/es.json', {
     encoding: 'utf-8',
   })
 );
 
 const deData = JSON.parse(
-  fs.readFileSync('./input/de.i18n.json', {
+  fs.readFileSync('./input/de.json', {
     encoding: 'utf-8',
   })
 );
 
 const frData = JSON.parse(
-  fs.readFileSync('./input/fr.i18n.json', {
+  fs.readFileSync('./input/fr.json', {
     encoding: 'utf-8',
   })
 );
 
 const ptData = JSON.parse(
-  fs.readFileSync('./input/pt.i18n.json', {
+  fs.readFileSync('./input/pt.json', {
     encoding: 'utf-8',
   })
 );
 
 const spellLevelData = JSON.parse(
-  fs.readFileSync('./temp/SpellLevelsRoot.json', {
+  fs.readFileSync('./temp/spell_levels.json', {
     encoding: 'utf-8',
   })
 );
 
 const effectData = JSON.parse(
-  fs.readFileSync('./temp/EffectsRoot.json', {
+  fs.readFileSync('./temp/effects.json', {
     encoding: 'utf-8',
   })
 );
 
 const monsterData = JSON.parse(
-  fs.readFileSync('./temp/MonstersRoot.json', {
+  fs.readFileSync('./temp/monsters.json', {
     encoding: 'utf-8',
   })
 );

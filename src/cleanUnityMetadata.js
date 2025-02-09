@@ -3,15 +3,14 @@ import { join } from 'path';
 import { writeOutput } from './utils.js';
 
 const filenames = [
-  'EffectsRoot',
-  'SpellConversionsRoot',
-  'SpellLevelsRoot',
-  'SpellPairsRoot',
-  'SpellsRoot',
-  'SpellStatesRoot',
-  'SpellTypesRoot',
-  'SpellVariantsRoot',
-  'MonstersRoot',
+  'effects',
+  'spell_levels',
+  'spell_pairs',
+  'spells',
+  'spell_states',
+  'spell_types',
+  'spell_variants',
+  'monsters',
 ];
 
 const tempDir = join(process.cwd(), 'temp');

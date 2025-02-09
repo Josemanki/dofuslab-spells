@@ -13,7 +13,7 @@ First we must understand folder structure - we need an input folder and an outpu
 ### So, how do we use it then?
 
 - We must place a json copy of the following files into the `input` folder:
-  `EffectsRoot.json, de.i18n.json, en.i18n.json, es.i18n.json, fr.i18n.json, it.i18n.json, pt.i18n.json, SpellLevelsRoot.json, SpellPairsRoot.json, SpellsRoot.json, SpellStatesRoot.json, SpellVariantsRoot.json`, `MonstersRoot.json`.
+  `effects.json, de.json, en.json, es.json, fr.json, it.json, pt.json, spell_levels.json, spell_pairs.json, spells.json, spell_states.json, spell_variants.json`, `monsters.json`.
 
 - Execute `node .\generate.js` in order to generate the new data from the files.
 

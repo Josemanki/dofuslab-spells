@@ -5,37 +5,37 @@ import { modifiableEffectStrings } from './constants.js';
 const modifiableEffects = Object.keys(modifiableEffectStrings).map(Number);
 
 const effectData = JSON.parse(
-  fs.readFileSync('./temp/EffectsRoot.json', {
+  fs.readFileSync('./temp/effects.json', {
     encoding: 'utf-8',
   })
 );
 
 const enData = JSON.parse(
-  fs.readFileSync('./input/en.i18n.json', {
+  fs.readFileSync('./input/en.json', {
     encoding: 'utf-8',
   })
 );
 
 const frData = JSON.parse(
-  fs.readFileSync('./input/fr.i18n.json', {
+  fs.readFileSync('./input/fr.json', {
     encoding: 'utf-8',
   })
 );
 
 const esData = JSON.parse(
-  fs.readFileSync('./input/es.i18n.json', {
+  fs.readFileSync('./input/es.json', {
     encoding: 'utf-8',
   })
 );
 
 const deData = JSON.parse(
-  fs.readFileSync('./input/de.i18n.json', {
+  fs.readFileSync('./input/de.json', {
     encoding: 'utf-8',
   })
 );
 
 const ptData = JSON.parse(
-  fs.readFileSync('./input/pt.i18n.json', {
+  fs.readFileSync('./input/pt.json', {
     encoding: 'utf-8',
   })
 );

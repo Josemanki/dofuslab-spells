@@ -3,7 +3,7 @@ import { BREED_TO_CLASS_MAP } from './constants.js';
 import { writeOutput } from './utils.js';
 
 const spellVariants = JSON.parse(
-  fs.readFileSync('./temp/SpellVariantsRoot.json', {
+  fs.readFileSync('./temp/spell_variants.json', {
     encoding: 'utf-8',
   })
 );
