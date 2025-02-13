@@ -205,90 +205,75 @@ const getEffects = (effects) => {
   };
 };
 
-let translatedSpells = [];
-let debugTranslations = [];
+const translatedSpells = {};
+const debugTranslations = {};
 
-spellIdList.forEach((classArray) => {
-  let translatedClassSpells = [];
-  let spellDebugTranslations = [];
-  classArray.flat().forEach((spell) => {
-    translatedClassSpells = [
-      ...translatedClassSpells,
-      {
-        name: {
-          en: datasets['en'][spell.nameId],
-          fr: datasets['fr'][spell.nameId],
-          de: datasets['de'][spell.nameId],
-          es: datasets['es'][spell.nameId],
-          it: `[!] ${datasets['it'][spell.nameId]}`,
-          pt: datasets['pt'][spell.nameId],
-        },
-        description: {
-          en: statsParser.sanitizeSpellText(
-            datasets['en'][spell.descriptionId]
-          ),
-          fr: statsParser.sanitizeSpellText(
-            datasets['fr'][spell.descriptionId]
-          ),
-          de: statsParser.sanitizeSpellText(
-            datasets['de'][spell.descriptionId]
-          ),
-          es: statsParser.sanitizeSpellText(
-            datasets['es'][spell.descriptionId]
-          ),
-          it: `[!] ${statsParser.sanitizeSpellText(
-            datasets['it'][spell.descriptionId]
-          )}`,
-          pt: statsParser.sanitizeSpellText(
-            datasets['pt'][spell.descriptionId]
-          ),
-        },
-        imageUrl: `spell/${spell.icon}.png`,
-        effects: spell.spellLevels.map((spellLevelId) => {
-          const eff = spellLevelData.find((spellToFind) => {
-            return spellToFind.id == spellLevelId;
-          });
+Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
+  const flattenedSpellPairs = breedSpellPairs.flat();
 
-          const aoeType = null;
-          return {
-            level: eff.minPlayerLevel ? String(eff.minPlayerLevel) : null,
-            apCost: eff.apCost ? String(eff.apCost) : null,
-            cooldown: eff.minCastInterval ? String(eff.minCastInterval) : null,
-            baseCritRate: eff.criticalHitProbability
-              ? String(eff.criticalHitProbability)
-              : null,
-            castsPerPlayer: eff.maxCastPerTarget
-              ? String(eff.maxCastPerTarget)
-              : null,
-            castsPerTurn: eff.maxCastPerTurn
-              ? String(eff.maxCastPerTurn)
-              : null,
-            needLos: eff.castTestLos,
-            modifiableRange: eff.rangeCanBeBoosted,
-            isLinear: eff.castInLine,
-            needsFreeCell: eff.needFreeCell,
-            aoeType: aoeType,
-            spellRange: getSpellRange(eff.minRange, eff.range),
-            normalEffects: getEffects(eff.effects.Array),
-            criticalEffects: getEffects(eff.criticalEffect.Array),
-          };
-        }),
+  const classSpells = flattenedSpellPairs.map((spell) => {
+    return {
+      name: {
+        en: datasets['en'][spell.nameId],
+        fr: datasets['fr'][spell.nameId],
+        de: datasets['de'][spell.nameId],
+        es: datasets['es'][spell.nameId],
+        it: `[!] ${datasets['it'][spell.nameId]}`,
+        pt: datasets['pt'][spell.nameId],
       },
-    ];
+      description: {
+        en: statsParser.sanitizeSpellText(datasets['en'][spell.descriptionId]),
+        fr: statsParser.sanitizeSpellText(datasets['fr'][spell.descriptionId]),
+        de: statsParser.sanitizeSpellText(datasets['de'][spell.descriptionId]),
+        es: statsParser.sanitizeSpellText(datasets['es'][spell.descriptionId]),
+        it: `[!] ${statsParser.sanitizeSpellText(
+          datasets['it'][spell.descriptionId]
+        )}`,
+        pt: statsParser.sanitizeSpellText(datasets['pt'][spell.descriptionId]),
+      },
+      imageUrl: `spell/${spell.icon}.png`,
+      effects: spell.spellLevels.map((spellLevelId) => {
+        const eff = spellLevelData.find((spellToFind) => {
+          return spellToFind.id == spellLevelId;
+        });
 
-    if (debugEnabled) {
-      debugTranslations = [
-        ...debugTranslations,
-        {
-          id: spell.id,
-          name: datasets['en'][spell.nameId],
-        },
-      ];
-    }
+        const aoeType = null;
+        return {
+          level: eff.minPlayerLevel ? String(eff.minPlayerLevel) : null,
+          apCost: eff.apCost ? String(eff.apCost) : null,
+          cooldown: eff.minCastInterval ? String(eff.minCastInterval) : null,
+          baseCritRate: eff.criticalHitProbability
+            ? String(eff.criticalHitProbability)
+            : null,
+          castsPerPlayer: eff.maxCastPerTarget
+            ? String(eff.maxCastPerTarget)
+            : null,
+          castsPerTurn: eff.maxCastPerTurn ? String(eff.maxCastPerTurn) : null,
+          needLos: eff.castTestLos,
+          modifiableRange: eff.rangeCanBeBoosted,
+          isLinear: eff.castInLine,
+          needsFreeCell: eff.needFreeCell,
+          aoeType: aoeType,
+          spellRange: getSpellRange(eff.minRange, eff.range),
+          normalEffects: getEffects(eff.effects.Array),
+          criticalEffects: getEffects(eff.criticalEffect.Array),
+        };
+      }),
+    };
   });
 
-  debugTranslations = [...debugTranslations, spellDebugTranslations];
-  translatedSpells = [...translatedSpells, translatedClassSpells];
+  translatedSpells[breed] = classSpells;
+
+  if (debugEnabled) {
+    const classDebugSpells = flattenedSpellPairs.map((spell) => {
+      return {
+        id: spell.id,
+        name: datasets['en'][spell.nameId],
+      };
+    });
+
+    debugTranslations[breed] = classDebugSpells;
+  }
 });
 
 writeOutput('./output/translatedEffects.json', translatedSpells);

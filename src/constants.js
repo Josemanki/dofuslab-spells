@@ -22,6 +22,26 @@ export const modifiableEffectStrings = {
   3002: 'Best element healing',
 };
 
+// Buff effect ids that DofusLab currently supports
+export const buffEffectStrings = {
+  138: 'Power',
+  414: 'Pushback damage',
+  112: 'Damage',
+  115: 'Critical',
+  2800: '% Melee damage',
+  2812: '% Spell damage',
+  1171: '% Final damage',
+  268: 'Agility',
+  119: 'Agility',
+  266: 'Chance',
+  123: 'Chance',
+  269: 'Intelligence',
+  126: 'Intelligence',
+  271: 'Strength',
+  118: 'Strength',
+  2804: '% Ranged damage',
+};
+
 // Referential for the breed list, and in case we need them in the future
 export const BREED_TO_CLASS_MAP = {
   1: 'Feca',

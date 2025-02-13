@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { writeOutput } from './utils.js';
+import { BREED_TO_CLASS_MAP } from './constants.js';
 
 const englishTranslations = JSON.parse(
   fs.readFileSync('./input/en.json', {
@@ -49,7 +50,10 @@ breedList.forEach((breed) => {
     classSpells = [...classSpells, currentSpellPair];
   });
 
-  spellsByClass = [...spellsByClass, classSpells];
+  spellsByClass = {
+    ...spellsByClass,
+    [BREED_TO_CLASS_MAP[breed.breed]]: classSpells,
+  };
 });
 
 writeOutput('./temp/spellIdList.json', spellsByClass);
