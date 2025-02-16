@@ -25,12 +25,12 @@ export const modifiableEffectStrings = {
 // Buff effect ids that DofusLab currently supports
 export const buffEffectStrings = {
   138: 'Power',
-  414: 'Pushback damage',
+  414: 'Pushback Damage',
   112: 'Damage',
   115: 'Critical',
-  2800: '% Melee damage',
-  2812: '% Spell damage',
-  1171: '% Final damage',
+  2800: '% Melee Damage',
+  2812: '% Spell Damage',
+  1171: '% Final Damage',
   268: 'Agility',
   119: 'Agility',
   266: 'Chance',
@@ -39,7 +39,7 @@ export const buffEffectStrings = {
   126: 'Intelligence',
   271: 'Strength',
   118: 'Strength',
-  2804: '% Ranged damage',
+  2804: '% Ranged Damage',
 };
 
 // Referential for the breed list, and in case we need them in the future

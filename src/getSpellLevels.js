@@ -7,9 +7,9 @@ import {
   modifiableEffectStrings,
 } from './constants.js';
 import { StatTemplateParser } from './templateEngine.js';
-import { cleanTempDirectory, writeOutput } from './utils.js';
+import { writeOutput } from './utils.js';
 
-const debugEnabled = process.argv.includes('--keep-temp-files');
+const debugEnabled = process.argv.includes('--with-debug-effects');
 
 const spellIdList = JSON.parse(
   fs.readFileSync('./temp/spellIdList.json', {
@@ -278,5 +278,3 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
 
 writeOutput('./output/translatedEffects.json', translatedSpells);
 debugEnabled && writeOutput('./temp/debugEffects.json', debugTranslations);
-
-!debugEnabled && cleanTempDirectory();
