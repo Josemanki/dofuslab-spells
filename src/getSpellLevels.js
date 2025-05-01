@@ -10,7 +10,7 @@ import { StatTemplateParser } from './templateEngine.js';
 import { getSpellMetaProperties, writeOutput } from './utils.js';
 
 const debugEnabled = process.argv.includes('--with-debug-effects');
-const ignoreCustomEffects = process.argv.includes('--ignore-custom-effects');
+const includeCustomEffects = process.argv.includes('--include-custom-effects');
 
 const spellIdList = JSON.parse(
   fs.readFileSync('./temp/spellIdList.json', {
@@ -188,7 +188,7 @@ const getEffects = (effects) => {
             ? String(effect.diceNum)
             : effect.diceSide,
       });
-    } else if (!ignoreCustomEffects) {
+    } else if (includeCustomEffects) {
       customEffects = {
         en: [...customEffects.en, parseEffect(effect, 'en')],
         fr: [...customEffects.fr, parseEffect(effect, 'fr')],

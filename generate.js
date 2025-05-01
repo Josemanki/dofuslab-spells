@@ -3,7 +3,7 @@ import { cleanTempDirectory } from './src/utils.js';
 
 const args = process.argv.slice(2);
 const keepTempFiles = args.includes('--keep-temp-files');
-const ignoreCustomEffects = args.includes('--ignore-custom-effects');
+const includeCustomEffects = args.includes('--include-custom-effects');
 
 function runScript(script, args) {
   const argsString = args ? args.join(' ') : '';
