@@ -7,9 +7,10 @@ import {
   modifiableEffectStrings,
 } from './constants.js';
 import { StatTemplateParser } from './templateEngine.js';
-import { writeOutput } from './utils.js';
+import { getSpellMetaProperties, writeOutput } from './utils.js';
 
 const debugEnabled = process.argv.includes('--with-debug-effects');
+const ignoreCustomEffects = process.argv.includes('--ignore-custom-effects');
 
 const spellIdList = JSON.parse(
   fs.readFileSync('./temp/spellIdList.json', {
@@ -187,7 +188,7 @@ const getEffects = (effects) => {
             ? String(effect.diceNum)
             : effect.diceSide,
       });
-    } else {
+    } else if (!ignoreCustomEffects) {
       customEffects = {
         en: [...customEffects.en, parseEffect(effect, 'en')],
         fr: [...customEffects.fr, parseEffect(effect, 'fr')],
@@ -237,6 +238,9 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
           return spellToFind.id == spellLevelId;
         });
 
+        const { isLinear, needLos, needsFreeCell, modifiableRange } =
+          getSpellMetaProperties(eff);
+
         const aoeType = null;
         return {
           level: eff.minPlayerLevel ? String(eff.minPlayerLevel) : null,
@@ -249,10 +253,10 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
             ? String(eff.maxCastPerTarget)
             : null,
           castsPerTurn: eff.maxCastPerTurn ? String(eff.maxCastPerTurn) : null,
-          needLos: eff.castTestLos,
-          modifiableRange: eff.rangeCanBeBoosted,
-          isLinear: eff.castInLine,
-          needsFreeCell: eff.needFreeCell,
+          needLos: needLos,
+          modifiableRange: modifiableRange,
+          isLinear: isLinear,
+          needsFreeCell: needsFreeCell,
           aoeType: aoeType,
           spellRange: getSpellRange(eff.minRange, eff.range),
           normalEffects: getEffects(eff.effects.Array),

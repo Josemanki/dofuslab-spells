@@ -3,6 +3,7 @@ import { cleanTempDirectory } from './src/utils.js';
 
 const args = process.argv.slice(2);
 const keepTempFiles = args.includes('--keep-temp-files');
+const ignoreCustomEffects = args.includes('--ignore-custom-effects');
 
 function runScript(script, args) {
   const argsString = args ? args.join(' ') : '';
@@ -14,6 +15,7 @@ runScript('src/getBreeds.js');
 runScript('src/getNameAndDescription.js');
 runScript('src/getEffectList.js');
 runScript('src/getSpellLevels.js', args);
+runScript('src/getBuffs.js');
 
 if (!keepTempFiles) {
   cleanTempDirectory();
