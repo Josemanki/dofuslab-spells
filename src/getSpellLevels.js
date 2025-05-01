@@ -210,10 +210,8 @@ const translatedSpells = {};
 const debugTranslations = {};
 
 Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
-  const flattenedSpellPairs = breedSpellPairs.flat();
-
-  const classSpells = flattenedSpellPairs.map((spell) => {
-    return {
+  const classSpells = breedSpellPairs.map((spellPair) =>
+    spellPair.map((spell) => ({
       name: {
         en: datasets['en'][spell.nameId],
         fr: datasets['fr'][spell.nameId],
@@ -263,18 +261,22 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
           criticalEffects: getEffects(eff.criticalEffect.Array),
         };
       }),
-    };
+    }))
+  );
+
+  translatedSpells[breed] = classSpells.sort((a, b) => {
+    const levelA = parseInt(a[0].effects[0].level || 0);
+    const levelB = parseInt(b[0].effects[0].level || 0);
+    return levelA - levelB;
   });
 
-  translatedSpells[breed] = classSpells;
-
   if (debugEnabled) {
-    const classDebugSpells = flattenedSpellPairs.map((spell) => {
-      return {
+    const classDebugSpells = breedSpellPairs.map((spellPair) =>
+      spellPair.map((spell) => ({
         id: spell.id,
         name: datasets['en'][spell.nameId],
-      };
-    });
+      }))
+    );
 
     debugTranslations[breed] = classDebugSpells;
   }
