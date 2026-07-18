@@ -33,6 +33,10 @@ breedList.forEach((breed) => {
 
       return {
         id: foundSpell[0].id,
+        // Resolved name (not just the nameId) so spellIdList is a readable
+        // id -> name reference for authoring overrides on spells that never
+        // surface in the review report.
+        name: englishTranslations.entries[foundSpell[0].nameId],
         icon: foundSpell[0].iconId,
         nameId: foundSpell[0].nameId,
         descriptionId: foundSpell[0].descriptionId,

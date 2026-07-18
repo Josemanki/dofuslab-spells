@@ -81,6 +81,11 @@ export const effectsWithStates = [950, 951, 952];
 // that is in diceNum so #1 - an example would be "Summons: #1" becomes "Summons: Melanic tofu"
 export const effectsWithSummons = [181, 185, 1008, 1011, 2796];
 
+// Effect that adds flat base damage per cast (e.g. "Arcane Torrent: +2 base
+// damage"). DofusLab models this as damageIncrease (the per-stack amount) plus
+// damageIncreaseMaxStacks (the cap) rather than a plain effect line.
+export const damageIncreaseEffectId = 293;
+
 export const effectsWithoutTranslations = [
   // These only have "#1" as their translation so we kill them
   237, 792, 793, 814, 1017, 1018, 1019, 1084, 1160, 1161, 1175, 1187, 2017,
