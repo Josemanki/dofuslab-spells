@@ -6,6 +6,8 @@ import {
   effectsWithoutTranslations,
   modifiableEffectStrings,
   damageIncreaseEffectId,
+  trapEffectIds,
+  CLASS_NAME_IDS,
 } from './constants.js';
 import { StatTemplateParser } from './templateEngine.js';
 import { getSpellMetaProperties, writeOutput } from './utils.js';
@@ -82,6 +84,33 @@ const monsterData = JSON.parse(
     encoding: 'utf-8',
   })
 );
+
+// Id lookups for resolving trap/glyph sub-spells on demand.
+const spellsById = {};
+for (const s of fullSpellList) if (s && s.id != null) spellsById[s.id] = s;
+const spellLevelsById = {};
+for (const l of spellLevelData) if (l && l.id != null) spellLevelsById[l.id] = l;
+
+// Replaces trap/glyph-placement effects with the referenced sub-spell's effects
+// (one level deep). `arrayKey` picks normal vs critical effects on the sub-spell
+// so a trap's crit damage folds into the placing spell's crit effects.
+const expandTrapEffects = (effects, arrayKey) => {
+  const out = [];
+  for (const effect of effects) {
+    if (effect && trapEffectIds.includes(effect.effectId)) {
+      const sub = spellsById[effect.diceNum];
+      const levels = sub?.spellLevels?.Array;
+      const subLevelId = levels?.[effect.diceSide - 1] ?? levels?.[levels.length - 1];
+      const subEffects = spellLevelsById[subLevelId]?.[arrayKey]?.Array;
+      if (subEffects) {
+        out.push(...subEffects);
+        continue;
+      }
+    }
+    out.push(effect);
+  }
+  return out;
+};
 
 const getSpellRange = (min, max) => {
   return {
@@ -190,21 +219,6 @@ const toStatEntry = (candidate) => ({
   maxStat: candidate.maxStat,
 });
 
-// Collapses exact-duplicate conditional entries (same label + stat + values).
-// The label already encodes the delay annotation (e.g. "(in 3 turns)"), so an
-// immediate and a delayed hit with the same values are kept distinct here.
-const dedupeConditionalEntries = (entries) => {
-  const seen = new Set();
-  const out = [];
-  for (const entry of entries) {
-    const key = `${entry.condition.en}|${entry.stat}|${entry.minStat}|${entry.maxStat}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(entry);
-  }
-  return out;
-};
-
 // Decides how a spell level's modifiable effects are surfaced. The two buckets
 // are mutually exclusive per slot:
 //  - modifiableEffect: used only when NOTHING in the slot is conditional —
@@ -286,7 +300,10 @@ const routeModifiables = (candidates) => {
   // immediate lines to mirror the game's separate section.
   const immediate = candidates.filter((c) => !(c.delay > 0));
   const delayed = candidates.filter((c) => c.delay > 0);
-  const conditionalEffect = dedupeConditionalEntries([
+  // Repeated lines are kept: the game renders them separately (e.g. Cerberus
+  // shows "Raage" twice and "Animal Form" three times), so they're genuine, not
+  // duplicates to collapse.
+  const conditionalEffect = [
     ...buildLabelledEntries(immediate, isKindSplit, isBaseEquivalent, false),
     ...buildLabelledEntries(
       delayed,
@@ -294,7 +311,17 @@ const routeModifiables = (candidates) => {
       isBaseEquivalent,
       true
     ),
-  ]);
+  ];
+
+  // If every entry resolves to the same single condition there is no real
+  // choice to make (e.g. Knell's damages are all "if caster has Telefrag"), so
+  // surface them as normal effects rather than a one-option conditional.
+  const distinctConditions = new Set(conditionalEffect.map((e) => e.condition.en));
+  if (distinctConditions.size <= 1) {
+    return {
+      modifiableEffect: conditionalEffect.map(({ condition, ...entry }) => entry),
+    };
+  }
   return { conditionalEffect };
 };
 
@@ -312,8 +339,8 @@ const getDamageIncrease = (effects) => {
 //    concurrent-reachable stacks (e.g. Atonement Arrow's two pulses → 2).
 // Spells that hide the cap in a state chain (e.g. Toxines) aren't derived here
 // and are left for the manual pass.
-const getDamageIncreaseMaxStacks = (eff) => {
-  const applications = eff.effects.Array.filter(
+const getDamageIncreaseMaxStacks = (eff, effects) => {
+  const applications = effects.filter(
     (e) => e && e.effectId === damageIncreaseEffectId
   ).length;
   if (applications === 0) return undefined;
@@ -335,12 +362,23 @@ const getEffects = (effects) => {
     // Promoted to damageIncrease below — don't also render it as text.
     if (effect.effectId === damageIncreaseEffectId) return;
     if (validModifiableKeys.includes(String(effect.effectId))) {
-      const singleValue = isSingleValueStat(effect.effectId);
+      const singleValueStat = isSingleValueStat(effect.effectId);
+      // A value with no range carries on maxStat with a null minStat (the repo
+      // convention). No range means: a single-value stat (pushback/shield), the
+      // diceSide 0 sentinel, or diceSide already equal to diceNum.
+      const noRange =
+        singleValueStat ||
+        effect.diceSide === 0 ||
+        effect.diceSide === effect.diceNum;
       candidates.push({
         stat: modifiableEffectStrings[effect.effectId],
         category: effectCategory(effect.effectId),
-        minStat: singleValue ? null : effect.diceNum,
-        maxStat: singleValue ? String(effect.diceNum) : effect.diceSide,
+        minStat: noRange ? null : effect.diceNum,
+        maxStat: singleValueStat
+          ? String(effect.diceNum)
+          : noRange
+          ? effect.diceNum
+          : effect.diceSide,
         mask: parseMask(effect.targetMask),
         delay: effect.delay,
       });
@@ -364,14 +402,35 @@ const getEffects = (effects) => {
   };
 };
 
-const translatedSpells = {};
+const translatedSpells = [];
 const debugTranslations = {};
+
+// Localized class name from the shared translations, per output language.
+const classNames = (className) => {
+  const nameId = CLASS_NAME_IDS[className];
+  return {
+    en: datasets['en'][nameId],
+    fr: datasets['fr'][nameId],
+    de: datasets['de'][nameId],
+    es: datasets['es'][nameId],
+    it: datasets['it'][nameId],
+    pt: datasets['pt'][nameId],
+  };
+};
 // Spells whose derived values look uncertain and have no override yet — written
 // to output/review.json so the manual pass has a shortlist instead of a re-hunt.
 const reviewEntries = [];
 // Override ids that actually matched a spell this run; anything in overrides but
 // not here is dead (the spell was removed/re-id'd) and gets reported.
 const appliedOverrideIds = new Set();
+// Condition mask tokens we don't recognize (fall to the "other" fallback) on
+// the effects we actually condition-render (modifiable stats), so a future game
+// update that adds a new damage-gating token surfaces instead of silently
+// dropping. Keyed by token, with one example spell.
+const unrecognizedTokens = new Map();
+const modifiableEffectIds = new Set(
+  Object.keys(modifiableEffectStrings).map(Number)
+);
 
 Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
   const classSpells = breedSpellPairs.map((spellPair) =>
@@ -387,7 +446,23 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
           getSpellMetaProperties(eff);
 
         const aoeType = null;
-        const damageIncreaseMaxStacks = getDamageIncreaseMaxStacks(eff);
+        // Fold trap/glyph damage in from the referenced sub-spell.
+        const normal = expandTrapEffects(eff.effects.Array, 'effects');
+        const critical = expandTrapEffects(eff.criticalEffect.Array, 'criticalEffect');
+        for (const rawEffect of [...normal, ...critical]) {
+          if (!rawEffect || !rawEffect.targetMask) continue;
+          if (!modifiableEffectIds.has(rawEffect.effectId)) continue;
+          for (const cond of parseMask(rawEffect.targetMask).conditions) {
+            if (cond.type === 'other' && !unrecognizedTokens.has(cond.token)) {
+              unrecognizedTokens.set(cond.token, {
+                token: cond.token,
+                spellId: spell.id,
+                name: datasets['en'][spell.nameId],
+              });
+            }
+          }
+        }
+        const damageIncreaseMaxStacks = getDamageIncreaseMaxStacks(eff, normal);
         return {
           level: eff.minPlayerLevel ? String(eff.minPlayerLevel) : null,
           apCost: eff.apCost ? String(eff.apCost) : null,
@@ -406,8 +481,8 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
           aoeType: aoeType,
           spellRange: getSpellRange(eff.minRange, eff.range),
           ...(damageIncreaseMaxStacks !== undefined ? { damageIncreaseMaxStacks } : {}),
-          normalEffects: getEffects(eff.effects.Array),
-          criticalEffects: getEffects(eff.criticalEffect.Array),
+          normalEffects: getEffects(normal),
+          criticalEffects: getEffects(critical),
           // Manual overrides win over the derived values.
           ...spellOverride,
         };
@@ -457,10 +532,13 @@ Object.entries(spellIdList).forEach(([breed, breedSpellPairs]) => {
     })
   );
 
-  translatedSpells[breed] = classSpells.sort((a, b) => {
-    const levelA = parseInt(a[0].effects[0].level || 0);
-    const levelB = parseInt(b[0].effects[0].level || 0);
-    return levelA - levelB;
+  translatedSpells.push({
+    names: classNames(breed),
+    spells: classSpells.sort((a, b) => {
+      const levelA = parseInt(a[0].effects[0].level || 0);
+      const levelB = parseInt(b[0].effects[0].level || 0);
+      return levelA - levelB;
+    }),
   });
 
   if (debugEnabled) {
@@ -481,9 +559,12 @@ const deadOverrides = Object.keys(overrides)
   .filter((id) => !appliedOverrideIds.has(id))
   .map((id) => ({ spellId: Number(id), override: overrides[id] }));
 
+const unrecognizedConditionTokens = [...unrecognizedTokens.values()];
+
 writeOutput('./output/review.json', {
   needsReview: reviewEntries,
   deadOverrides,
+  unrecognizedConditionTokens,
 });
 console.log(
   `Review: ${reviewEntries.length} spell(s) need a manual check (see output/review.json)`
@@ -492,6 +573,13 @@ if (deadOverrides.length) {
   console.warn(
     `Warning: ${deadOverrides.length} dead override(s) — no spell matches id(s): ${deadOverrides
       .map((d) => d.spellId)
+      .join(', ')}`
+  );
+}
+if (unrecognizedConditionTokens.length) {
+  console.warn(
+    `Warning: ${unrecognizedConditionTokens.length} unrecognized condition token(s): ${unrecognizedConditionTokens
+      .map((u) => u.token)
       .join(', ')}`
   );
 }

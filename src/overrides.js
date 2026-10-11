@@ -37,4 +37,7 @@ export const overrides = {
 
   // Muzzle: the real cap (unlimited) is based on the amount of enemies adjacent to the target, not the spell's own maxStack. We make it 4 as only 4 enemies can be adjacent to the target.
   13793: { damageIncreaseMaxStacks: 4 },
+
+  // Malevolent Trap: the real cap (unlimited) is based on the amount of enemies in the area of effect outside the trap, not the spell's own maxStack. We make it 8 after mathing area + max ally count.
+  12948: { damageIncreaseMaxStacks: 8 },
 };

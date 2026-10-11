@@ -24,6 +24,11 @@ const isSummonSentinel = (letter, rest) =>
   (letter === 'F' || letter === 'f') && rest === '50000';
 
 const parseCondition = (letter, rest, onCaster) => {
+  // Shield points: PB = has shield, pb = no shield (b = bouclier). Guarded on
+  // the trailing b so single P/p still means the summon flag below.
+  if ((letter === 'P' || letter === 'p') && (rest === 'B' || rest === 'b')) {
+    return { type: 'flag', flag: 'shield', positive: letter === 'P', onCaster };
+  }
   const value = rest === '' ? null : Number(rest);
   switch (letter) {
     case 'E':
@@ -42,6 +47,25 @@ const parseCondition = (letter, rest, onCaster) => {
       return { type: 'breed', positive: true, id: value, onCaster };
     case 'b':
       return { type: 'breed', positive: false, id: value, onCaster };
+    // Boolean flags (no value); case encodes has/not.
+    case 'P':
+      return { type: 'flag', flag: 'summon', positive: true, onCaster };
+    case 'p':
+      return { type: 'flag', flag: 'summon', positive: false, onCaster };
+    case 'O':
+      return { type: 'flag', flag: 'mainTarget', positive: true, onCaster };
+    case 'o':
+      return { type: 'flag', flag: 'mainTarget', positive: false, onCaster };
+    case 'K':
+      return { type: 'flag', flag: 'carried', positive: true, onCaster };
+    case 'R':
+      return { type: 'flag', flag: 'portal', positive: true, onCaster };
+    case 'r':
+      return { type: 'flag', flag: 'portal', positive: false, onCaster };
+    case 'T':
+      return { type: 'flag', flag: 'telefrag', positive: true, onCaster };
+    case 'W':
+      return { type: 'flag', flag: 'teleported', positive: true, onCaster };
     default:
       return { type: 'other', token: `${letter}${rest}`, onCaster };
   }

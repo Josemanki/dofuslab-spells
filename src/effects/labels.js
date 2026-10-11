@@ -126,11 +126,49 @@ const stateClause = (side, positive, names, lang) => {
   return `${prefix} ${clean.join(` ${connective} `)}`;
 };
 
+// Boolean condition flags (no value), target-side phrasing per language.
+const FLAG_CLAUSES = {
+  shield: {
+    true: { en: 'with shield', fr: 'avec bouclier', de: 'mit Schild', es: 'con escudo', it: 'con scudo', pt: 'com escudo' },
+    false: { en: 'without shield', fr: 'sans bouclier', de: 'ohne Schild', es: 'sin escudo', it: 'senza scudo', pt: 'sem escudo' },
+  },
+  portal: {
+    true: { en: 'through a portal', fr: 'à travers un portail', de: 'durch ein Portal', es: 'a través de un portal', it: 'attraverso un portale', pt: 'através de um portal' },
+    false: { en: 'not through a portal', fr: 'sans passer par un portail', de: 'nicht durch ein Portal', es: 'sin pasar por un portal', it: 'senza attraversare un portale', pt: 'sem passar por um portal' },
+  },
+  carried: {
+    true: { en: 'being carried', fr: 'porté', de: 'getragen', es: 'transportado', it: 'trasportato', pt: 'carregado' },
+    false: { en: 'not being carried', fr: 'non porté', de: 'nicht getragen', es: 'no transportado', it: 'non trasportato', pt: 'não carregado' },
+  },
+  telefrag: {
+    true: { en: 'telefragged this turn', fr: 'téléfragué ce tour', de: 'diese Runde telefragt', es: 'telefragmentado este turno', it: 'telefraggato questo turno', pt: 'telefragueado neste turno' },
+    false: { en: 'not telefragged this turn', fr: 'non téléfragué ce tour', de: 'diese Runde nicht telefragt', es: 'no telefragmentado este turno', it: 'non telefraggato questo turno', pt: 'não telefragueado neste turno' },
+  },
+  teleported: {
+    true: { en: 'teleported this turn', fr: 'téléporté ce tour', de: 'diese Runde teleportiert', es: 'teletransportado este turno', it: 'teletrasportato questo turno', pt: 'teletransportado neste turno' },
+    false: { en: 'not teleported this turn', fr: 'non téléporté ce tour', de: 'diese Runde nicht teleportiert', es: 'no teletransportado este turno', it: 'non teletrasportato questo turno', pt: 'não teletransportado neste turno' },
+  },
+  summon: {
+    true: { en: 'caster or summons', fr: 'lanceur ou invocations', de: 'Zauberer oder Beschwörungen', es: 'lanzador o invocaciones', it: 'lanciatore o evocazioni', pt: 'lançador ou invocações' },
+    false: { en: 'excluding caster and summons', fr: 'hors lanceur et invocations', de: 'ohne Zauberer und Beschwörungen', es: 'excepto lanzador e invocaciones', it: 'esclusi lanciatore ed evocazioni', pt: 'exceto lançador e invocações' },
+  },
+  mainTarget: {
+    true: { en: 'main target', fr: 'cible principale', de: 'Hauptziel', es: 'objetivo principal', it: 'bersaglio principale', pt: 'alvo principal' },
+    false: { en: 'secondary targets', fr: 'cibles secondaires', de: 'Nebenziele', es: 'objetivos secundarios', it: 'bersagli secondari', pt: 'alvos secundários' },
+  },
+};
+
+const flagClause = (flag, positive, lang) => {
+  const clause = FLAG_CLAUSES[flag];
+  return clause ? clause[positive ? 'true' : 'false'][lang] : '';
+};
+
 // ctx.stateName(id, lang) resolves a state id to its localized name.
 export const buildConditionLabel = (parsedMask, ctx = {}) => {
   const teamKey = parsedMask.teamKey ?? 'targets';
 
   const life = parsedMask.conditions.filter((c) => c.type === 'life');
+  const flags = parsedMask.conditions.filter((c) => c.type === 'flag');
   // Group state conditions so same-prefix clauses share one prefix and join
   // their names (e.g. "without Arrow I or Arrow II") instead of repeating it.
   const stateGroups = { targetTrue: [], targetFalse: [], casterTrue: [], casterFalse: [] };
@@ -153,6 +191,7 @@ export const buildConditionLabel = (parsedMask, ctx = {}) => {
     parts.push(stateClause('caster', true, names(stateGroups.casterTrue), lang));
     parts.push(stateClause('caster', false, names(stateGroups.casterFalse), lang));
     for (const c of life) parts.push(lifeClause(c.op, c.value, lang));
+    for (const c of flags) parts.push(flagClause(c.flag, c.positive, lang));
 
     out[lang] = parts.filter(Boolean).join(' ');
   }

@@ -65,6 +65,30 @@ export const BREED_TO_CLASS_MAP = {
   20: 'Forgelance',
 };
 
+// Translation ids for the class names themselves (resolved per language for the
+// output's `names` object), keyed by the English class name used in the output.
+export const CLASS_NAME_IDS = {
+  Feca: 1119685,
+  Osamodas: 1119691,
+  Enutrof: 1119703,
+  Sram: 1119675,
+  Xelor: 1119697,
+  Ecaflip: 1119679,
+  Eniripsa: 1119671,
+  Iop: 1119689,
+  Cra: 1119677,
+  Sadida: 1119701,
+  Sacrier: 1119699,
+  Pandawa: 1119687,
+  Rogue: 1119669,
+  Masqueraider: 1119693,
+  Foggernaut: 1119683,
+  Eliotrope: 1119695,
+  Huppermage: 1119666,
+  Ouginak: 1119681,
+  Forgelance: 1119673,
+};
+
 // These effectIds have spells in their descriptions so they relate differently
 // with the final string, the spellId has to be replaced in the template, for example
 // #1: +#3 Minimum Range becomes Flaming Crow: +2 Minimum Range
@@ -85,6 +109,11 @@ export const effectsWithSummons = [181, 185, 1008, 1011, 2796];
 // damage"). DofusLab models this as damageIncrease (the per-stack amount) plus
 // damageIncreaseMaxStacks (the cap) rather than a plain effect line.
 export const damageIncreaseEffectId = 293;
+
+// Trap/glyph placement effects. The real damage lives in a referenced sub-spell
+// (diceNum = spell id, diceSide = grade), so we fold that sub-spell's effects
+// into the placing spell rather than showing an empty damage output.
+export const trapEffectIds = [400, 401, 402, 1091, 1165];
 
 export const effectsWithoutTranslations = [
   // These only have "#1" as their translation so we kill them
